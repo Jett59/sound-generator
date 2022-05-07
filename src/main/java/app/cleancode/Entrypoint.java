@@ -1,8 +1,10 @@
 package app.cleancode;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import javax.sound.sampled.AudioFileFormat.Type;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -10,14 +12,14 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 
 public class Entrypoint {
-  private static final int UPSAMPLE_AMOUNT = 160;
-  private static final int DOWNSAMPLE_AMOUNT = 147;
-  private static final int INITIAL_SAMPLE_RATE = 44100;
+  private static final int UPSAMPLE_AMOUNT = 147;
+  private static final int DOWNSAMPLE_AMOUNT = 160;
+  private static final int INITIAL_SAMPLE_RATE = 48000;
   private static final int FINAL_SAMPLE_RATE =
       INITIAL_SAMPLE_RATE * UPSAMPLE_AMOUNT / DOWNSAMPLE_AMOUNT;
 
-  private static final double INPUT1_VOLUME = 0.25;
-  private static final double INPUT2_VOLUME = 0.5;
+  private static final double INPUT1_VOLUME = 1;
+  private static final double INPUT2_VOLUME = 1;
 
   public static void main(String[] args) throws Exception {
     AudioFormat format = new AudioFormat(INITIAL_SAMPLE_RATE, 16, 1, true, false);
@@ -57,6 +59,11 @@ public class Entrypoint {
     }
     dataBuffer.rewind();
     byte[] data = dataBuffer.array();
+    System.out.println("Writing to out.wav");
+    ByteArrayInputStream byteInputStream = new ByteArrayInputStream(data);
+    AudioInputStream audioInputStream = new AudioInputStream(byteInputStream, format, data.length);
+    AudioSystem.write(audioInputStream, Type.WAVE, new File("out.wav"));
+    audioInputStream.close();
     System.out.println("Playing");
     line.open(format);
     line.start();
